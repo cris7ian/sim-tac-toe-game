@@ -1,135 +1,82 @@
-<!DOCTYPE html>
-<html lang="en-us">
+<!doctype html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity WebGL Player | Sim Tac Toe</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sim Tac Toe — A Tic-Tac-Toe Immersive Sim</title>
+    <meta name="description" content="Play Sim Tac Toe, a playful tic-tac-toe immersive sim, right in your browser. Red crosses, turquoise rings, and a familiar game with a different perspective.">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="theme-color" content="#f4f1e7">
+    <link rel="canonical" href="https://tictactoe.salsaparapizza.com/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Sim Tac Toe">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:title" content="Sim Tac Toe — A Tic-Tac-Toe Immersive Sim">
+    <meta property="og:description" content="The first (and probably last) tic-tac-toe immersive sim. Play right in your browser.">
+    <meta property="og:url" content="https://tictactoe.salsaparapizza.com/">
+    <meta property="og:image" content="https://tictactoe.salsaparapizza.com/TemplateData/social-preview.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Sim Tac Toe: red crosses and turquoise rings around a tic-tac-toe board.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Sim Tac Toe — A Tic-Tac-Toe Immersive Sim">
+    <meta name="twitter:description" content="The first (and probably last) tic-tac-toe immersive sim. Play right in your browser.">
+    <meta name="twitter:image" content="https://tictactoe.salsaparapizza.com/TemplateData/social-preview.jpg">
+    <meta name="twitter:image:alt" content="Sim Tac Toe: red crosses and turquoise rings around a tic-tac-toe board.">
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48 64x64">
+    <link rel="icon" href="/TemplateData/favicon.svg" type="image/svg+xml" sizes="any">
+    <link rel="icon" href="/TemplateData/favicon-96.png" type="image/png" sizes="96x96">
+    <link rel="apple-touch-icon" href="/TemplateData/apple-touch-icon.png" sizes="180x180">
+    <link rel="preload" href="TemplateData/fonts/FreeSerif-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="TemplateData/style.css">
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "Sim Tac Toe",
+        "description": "A playful tic-tac-toe immersive sim you can play in your browser.",
+        "url": "https://tictactoe.salsaparapizza.com/",
+        "image": "https://tictactoe.salsaparapizza.com/TemplateData/social-preview.jpg",
+        "inLanguage": "en",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Web browser",
+        "browserRequirements": "JavaScript and WebGL 2 support required"
+      }
+    </script>
+    <script src="Build/simtactoc.loader.js" defer></script>
+    <script src="TemplateData/game.js" defer></script>
   </head>
   <body>
-    <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
+    <main class="page">
+      <header class="page-header">
+        <div class="identity">
+          <span class="marks" aria-hidden="true"><span class="cross"></span><span class="ring"></span></span>
+          <h1>Sim Tac Toe<span class="title-dot">.</span></h1>
         </div>
-      </div>
-      <div id="unity-warning"> </div>
-      <div id="unity-footer">
-        <div id="unity-fullscreen-button"></div>
-      </div>
-      <div id="credits">
-        <h3>Sim Tac Toe</h3>
-        <p>This is the first and likely last tic-tac-toe immesirve sim. You can press <i>[tab]</i> for help but I'm sure you know how to play.
-        </p>
-      </div>
-    </div>
-    
-    <script>
-
-      var container = document.querySelector("#unity-container");
-      var canvas = document.querySelector("#unity-canvas");
-      var loadingBar = document.querySelector("#unity-loading-bar");
-      var progressBarFull = document.querySelector("#unity-progress-bar-full");
-      var fullscreenButton = document.querySelector("#unity-fullscreen-button");
-      var warningBanner = document.querySelector("#unity-warning");
-
-      // Shows a temporary message banner/ribbon for a few seconds, or
-      // a permanent error message on top of the canvas if type=='error'.
-      // If type=='warning', a yellow highlight color is used.
-      // Modify or remove this function to customize the visually presented
-      // way that non-critical warnings and error messages are presented to the
-      // user.
-      function unityShowBanner(msg, type) {
-        function updateBannerVisibility() {
-          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-        }
-        var div = document.createElement('div');
-        div.innerHTML = msg;
-        warningBanner.appendChild(div);
-        if (type == 'error') div.style = 'background: red; padding: 10px;';
-        else {
-          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(function() {
-            warningBanner.removeChild(div);
-            updateBannerVisibility();
-          }, 5000);
-        }
-        updateBannerVisibility();
-      }
-
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/simtactoc.loader.js";
-      var config = {
-        dataUrl: buildUrl + "/simtactoc.data",
-        frameworkUrl: buildUrl + "/simtactoc.framework.js",
-        codeUrl: buildUrl + "/simtactoc.wasm",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: "Sim Tac Toe",
-        productVersion: "0.1.0",
-        showBanner: unityShowBanner,
-      };
-
-      // By default, Unity keeps WebGL canvas render target size matched with
-      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
-      // Set this to false if you want to decouple this synchronization from
-      // happening inside the engine, and you would instead like to size up
-      // the canvas DOM size and WebGL render target sizes yourself.
-      // config.matchWebGLToCanvasSize = false;
-
-      // If you would like all file writes inside Unity Application.persistentDataPath
-      // directory to automatically persist so that the contents are remembered when
-      // the user revisits the site the next time, uncomment the following line:
-      // config.autoSyncPersistentDataPath = true;
-      // This autosyncing is currently not the default behavior to avoid regressing
-      // existing user projects that might rely on the earlier manual
-      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
-      // expected to change.
-
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
-
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-        container.className = "unity-mobile";
-        canvas.className = "unity-mobile";
-
-        // To lower canvas resolution on mobile devices to gain some
-        // performance, uncomment the following line:
-        // config.devicePixelRatio = 1;
-
-
-      } else {
-        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-
-        canvas.style.width = "960px";
-        canvas.style.height = "600px";
-      }
-
-      loadingBar.style.display = "block";
-
-      var script = document.createElement("script");
-      script.src = loaderUrl;
-      script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
-          progressBarFull.style.width = 100 * progress + "%";
-              }).then((unityInstance) => {
-                loadingBar.style.display = "none";
-                fullscreenButton.onclick = () => {
-                  unityInstance.SetFullscreen(1);
-                };
-              }).catch((message) => {
-                alert(message);
-              });
-            };
-
-      document.body.appendChild(script);
-
-    </script>
+        <button id="unity-fullscreen-button" class="fullscreen-button" type="button" disabled>
+          <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H3v6M15 3h6v6M3 15v6h6M21 15v6h-6"/></svg>
+          <span>Fullscreen</span>
+        </button>
+      </header>
+      <section class="game-frame" aria-label="Play Sim Tac Toe">
+        <div id="unity-container" class="game-viewport" data-state="loading" aria-busy="true">
+          <canvas id="unity-canvas" width="960" height="600" tabindex="0" aria-label="Sim Tac Toe game. Press Tab inside the game for help.">Sim Tac Toe requires a browser with JavaScript and WebGL 2 support.</canvas>
+          <div id="unity-loading-bar" class="loading-overlay">
+            <div class="loading-content">
+              <span class="marks" aria-hidden="true"><span class="cross"></span><span class="ring"></span></span>
+              <p id="loading-label" role="status">Loading Sim Tac Toe…</p>
+              <div id="unity-progress" class="progress-track" role="progressbar" aria-label="Loading game" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="unity-progress-bar-full"></div></div>
+            </div>
+          </div>
+          <div id="unity-warning" class="game-warning" role="alert" hidden></div>
+        </div>
+      </section>
+      <footer class="page-footer">
+        <p>The first (and probably last) tic-tac-toe immersive sim.</p>
+        <p class="help-hint"><kbd>tab</kbd><span>for help</span></p>
+      </footer>
+      <noscript><p class="noscript-message">Enable JavaScript to play Sim Tac Toe. The game also requires WebGL 2 support.</p></noscript>
+    </main>
   </body>
 </html>
