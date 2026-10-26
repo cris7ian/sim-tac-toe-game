@@ -42,6 +42,10 @@ Unity API; they do not test gameplay.
 
 ## Publish from nuke
 
+When changing `TemplateData/style.css` or `TemplateData/game.js`, update its `v`
+query parameter in `index.html` to the first 12 hexadecimal SHA-256 characters.
+The tests enforce this cache version so Cloudflare cannot reuse stale wrapper files.
+
 Commit the verified changes first. Then run:
 
 ```bash

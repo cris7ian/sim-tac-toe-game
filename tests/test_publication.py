@@ -1,10 +1,11 @@
 """Static publication checks. Uses only the Python standard library."""
 from html.parser import HTMLParser
+import hashlib
 import json
 from pathlib import Path
 import struct
 import unittest
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -58,9 +59,21 @@ class PublicationTests(unittest.TestCase):
             for key in ["href", "src"]:
                 value = attrs.get(key)
                 if value and not urlsplit(value).scheme:
-                    self.assertTrue((ROOT / value.lstrip("/")).is_file(), value)
+                    self.assertTrue((ROOT / urlsplit(value).path.lstrip("/")).is_file(), value)
         self.assertTrue((ROOT / "TemplateData/fonts/FreeSerif.ttf").is_file())
         self.assertTrue((ROOT / "TemplateData/fonts/Lato-Regular.ttf").is_file())
+
+    def test_wrapper_asset_versions_match_content(self):
+        expected = {"TemplateData/style.css", "TemplateData/game.js"}
+        found = set()
+        for _, attrs in self.page.tags:
+            reference = attrs.get("href", attrs.get("src", ""))
+            parsed = urlsplit(reference)
+            if parsed.path in expected:
+                digest = hashlib.sha256((ROOT / parsed.path).read_bytes()).hexdigest()[:12]
+                self.assertEqual(parse_qs(parsed.query).get("v"), [digest])
+                found.add(parsed.path)
+        self.assertEqual(found, expected)
 
     def test_sitemap_and_crawler_access(self):
         tree = ET.parse(ROOT / "sitemap.xml")
@@ -84,7 +97,7 @@ class PublicationTests(unittest.TestCase):
 
     def test_loader_order_and_accessibility(self):
         scripts = [attrs for tag, attrs in self.page.tags if tag == "script" and "src" in attrs]
-        self.assertEqual([attrs["src"] for attrs in scripts], ["Build/simtactoc.loader.js", "TemplateData/game.js"])
+        self.assertEqual([urlsplit(attrs["src"]).path for attrs in scripts], ["Build/simtactoc.loader.js", "TemplateData/game.js"])
         self.assertTrue(all("defer" in attrs for attrs in scripts))
         canvas = next(attrs for tag, attrs in self.page.tags if tag == "canvas")
         self.assertEqual(canvas["tabindex"], "0")
